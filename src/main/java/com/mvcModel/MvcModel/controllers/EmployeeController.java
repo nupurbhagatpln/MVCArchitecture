@@ -1,44 +1,62 @@
 package com.mvcModel.MvcModel.controllers;
-
 import com.mvcModel.MvcModel.dtos.EmployeeDto;
-import com.mvcModel.MvcModel.entities.Employee;
-import com.mvcModel.MvcModel.repositories.EmployeeRepository;
 import com.mvcModel.MvcModel.services.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path="/employee")
 @RequiredArgsConstructor
 public class EmployeeController {
 
-//    private final EmployeeRepository employeeRepository;
     private final EmployeeService employeeService;
 
     @GetMapping(path="/{employeeId}")
-    public EmployeeDto getEmpolyeeById(@PathVariable(name="employeeId") Long id)
+    public ResponseEntity<EmployeeDto> getEmpolyeeById(@PathVariable(name="employeeId") Long id)
     {
-//        return new EmployeeDto(id,"Nupur","nupur@gmail.com",23, LocalDate.of(2000,2,24),true);
-        return  employeeService.getEmpolyeeById(id);
+        Optional<EmployeeDto> employeeDto=employeeService.getEmpolyeeById(id);
+        return employeeDto.map(employeeDto1 -> ResponseEntity.ok(employeeDto1))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // request param is to pass some values in the url to perform sorting and filtering the data, and it can be optional
     @GetMapping(path="")
-    public List<EmployeeDto> getAllEmployee(@RequestParam(required = false) Integer age, @RequestParam(required = false) String str)
+    public ResponseEntity<List<EmployeeDto>> getAllEmployee(@RequestParam(required = false) Integer age, @RequestParam(required = false) String str)
     {
-        //        return "All Employee"+age+" "+str;
-        return employeeService.getAllEMployee();
+        return ResponseEntity.ok(employeeService.getAllEMployee());
     }
 
     // Request Body is to pass the whole object as a param in controller
     @PostMapping("")
-    public EmployeeDto createANewEmployee(@RequestBody EmployeeDto employeeDto)
+    public ResponseEntity<EmployeeDto> createANewEmployee(@RequestBody EmployeeDto employeeDto)
     {
-//        employeeDto.setId(120L);
-        return  employeeService.createNewEmployee(employeeDto);
+        EmployeeDto createdEmployee=employeeService.createNewEmployee(employeeDto);
+        return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
 
+    @PutMapping(path="/{id}")
+    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable Long id,@RequestBody EmployeeDto employeeDto){
+        return ResponseEntity.ok(employeeService.updateEmployee(id,employeeDto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Boolean>  deleteEmployeeById(@PathVariable Long id)
+    {
+        boolean found=employeeService.deleteEmployeeById(id);
+        if(found)   return ResponseEntity.ok(true);
+        else return ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<EmployeeDto> updateFieldsOfEmployee(@PathVariable Long id, @RequestBody Map<String,Object> employeeField)
+    {
+        EmployeeDto updatedEmployee=employeeService.updateFieldsOfEmployee(id, employeeField);
+        if(updatedEmployee==null)   return ResponseEntity.notFound().build();
+        else    return ResponseEntity.ok(updatedEmployee);
+    }
 }
