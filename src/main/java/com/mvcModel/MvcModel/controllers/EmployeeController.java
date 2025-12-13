@@ -3,6 +3,7 @@ package com.mvcModel.MvcModel.controllers;
 import com.mvcModel.MvcModel.dtos.EmployeeDto;
 import com.mvcModel.MvcModel.entities.Employee;
 import com.mvcModel.MvcModel.repositories.EmployeeRepository;
+import com.mvcModel.MvcModel.services.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,29 +15,30 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeController {
 
-    private final EmployeeRepository employeeRepository;
+//    private final EmployeeRepository employeeRepository;
+    private final EmployeeService employeeService;
 
     @GetMapping(path="/{employeeId}")
-    public Employee getEmpolyeeById(@PathVariable(name="employeeId") Long id)
+    public EmployeeDto getEmpolyeeById(@PathVariable(name="employeeId") Long id)
     {
 //        return new EmployeeDto(id,"Nupur","nupur@gmail.com",23, LocalDate.of(2000,2,24),true);
-        return  employeeRepository.findById(id).orElse(null);
+        return  employeeService.getEmpolyeeById(id);
     }
 
-    // request param is to pass some values in the url to perform sortinf and filtering the data, and it can be optional
+    // request param is to pass some values in the url to perform sorting and filtering the data, and it can be optional
     @GetMapping(path="")
-    public List<Employee> getAllEmployee(@RequestParam(required = false) Integer age, @RequestParam(required = false) String str)
+    public List<EmployeeDto> getAllEmployee(@RequestParam(required = false) Integer age, @RequestParam(required = false) String str)
     {
         //        return "All Employee"+age+" "+str;
-        return employeeRepository.findAll();
+        return employeeService.getAllEMployee();
     }
 
     // Request Body is to pass the whole object as a param in controller
     @PostMapping("")
-    public Employee createANewEmployee(@RequestBody Employee employee)
+    public EmployeeDto createANewEmployee(@RequestBody EmployeeDto employeeDto)
     {
 //        employeeDto.setId(120L);
-        return  employeeRepository.save(employee);
+        return  employeeService.createNewEmployee(employeeDto);
     }
 
 }
