@@ -1,6 +1,7 @@
 package com.mvcModel.MvcModel.controllers;
 import com.mvcModel.MvcModel.dtos.EmployeeDto;
 import com.mvcModel.MvcModel.services.EmployeeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class EmployeeController {
 
     // Request Body is to pass the whole object as a param in controller
     @PostMapping("")
-    public ResponseEntity<EmployeeDto> createANewEmployee(@RequestBody EmployeeDto employeeDto)
+    public ResponseEntity<EmployeeDto> createANewEmployee(@RequestBody @Valid EmployeeDto employeeDto)
     {
         EmployeeDto createdEmployee=employeeService.createNewEmployee(employeeDto);
         return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
