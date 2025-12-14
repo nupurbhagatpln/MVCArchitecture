@@ -1,5 +1,6 @@
 package com.mvcModel.MvcModel.controllers;
 import com.mvcModel.MvcModel.dtos.EmployeeDto;
+import com.mvcModel.MvcModel.exceptions.ResourceNotFoundException;
 import com.mvcModel.MvcModel.services.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -17,12 +19,18 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
+//    @ExceptionHandler(NoSuchElementException.class)
+//    public ResponseEntity<String> handleEmployeeNotFoundException(NoSuchElementException exception)
+//    {
+//        return new ResponseEntity<>("Employee data not found in recods", HttpStatus.NOT_FOUND);
+//    }
+
     @GetMapping(path="/{employeeId}")
     public ResponseEntity<EmployeeDto> getEmpolyeeById(@PathVariable(name="employeeId") Long id)
     {
         Optional<EmployeeDto> employeeDto=employeeService.getEmpolyeeById(id);
         return employeeDto.map(employeeDto1 -> ResponseEntity.ok(employeeDto1))
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(()-> new ResourceNotFoundException("Resource not found with id: "+id));
     }
 
     // request param is to pass some values in the url to perform sorting and filtering the data, and it can be optional

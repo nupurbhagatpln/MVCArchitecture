@@ -2,6 +2,7 @@ package com.mvcModel.MvcModel.services;
 
 import com.mvcModel.MvcModel.dtos.EmployeeDto;
 import com.mvcModel.MvcModel.entities.Employee;
+import com.mvcModel.MvcModel.exceptions.ResourceNotFoundException;
 import com.mvcModel.MvcModel.repositories.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.el.util.ReflectionUtil;
@@ -42,6 +43,8 @@ public class EmployeeService {
     }
 
     public EmployeeDto updateEmployee(Long id, EmployeeDto employeeDto) {
+        boolean exits= employeeRepository.existsById(id);
+        if(!exits)  throw new ResourceNotFoundException("Employee not found with id: "+ id);
         Employee oldEmployee= modelMapper.map(employeeDto, Employee.class);
         oldEmployee.setId(id);
         Employee savedEmployee=employeeRepository.save(oldEmployee);
@@ -51,7 +54,7 @@ public class EmployeeService {
 
     public Boolean deleteEmployeeById(Long id) {
         boolean exits= employeeRepository.existsById(id);
-        if(!exits)  return false;
+        if(!exits)  throw  new ResourceNotFoundException("Employee not found with id: "+ id);
         employeeRepository.deleteById(id);
         return true;
     }
@@ -59,7 +62,7 @@ public class EmployeeService {
     public EmployeeDto updateFieldsOfEmployee(Long id, Map<String, Object> updates) {
 
         boolean exits= employeeRepository.existsById(id);
-        if(!exits)  return null;
+        if(!exits)  throw new ResourceNotFoundException("Employee not found with id: "+ id);
 
         Employee oldEmployee=employeeRepository.findById(id).get();
         updates.forEach((field,value)->{
