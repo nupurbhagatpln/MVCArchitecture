@@ -7,32 +7,36 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandlers {
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException exception)
+    public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException exception)
     {
         ApiError error= ApiError.builder().status(HttpStatus.NOT_FOUND).message(exception.getMessage()).build();
 
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return buildErrorResponseEntity(error);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleInternalServerError(Exception exception)
+    public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception)
     {
         ApiError error= ApiError.builder().status(HttpStatus.INTERNAL_SERVER_ERROR).message(exception.getMessage()).build();
 
-        return  new ResponseEntity<>(error,HttpStatus.INTERNAL_SERVER_ERROR);
+        return  buildErrorResponseEntity(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleArugmentNotValidError(MethodArgumentNotValidException exception)
+    public ResponseEntity<ApiResponse<?>> handleArgumentNotValidError(MethodArgumentNotValidException exception)
     {
         List<String> subError= exception.getBindingResult().getAllErrors().stream().map(error-> error.getDefaultMessage()).toList();
         ApiError error= ApiError.builder().status(HttpStatus.BAD_REQUEST).message("Input validation failed: ").allError(subError).build();
 
-        return  new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
+        return  buildErrorResponseEntity(error);
+    }
+
+    private ResponseEntity<ApiResponse<?>> buildErrorResponseEntity(ApiError error) {
+        return new ResponseEntity<>(new ApiResponse<>(error),error.getStatus());
     }
 }
